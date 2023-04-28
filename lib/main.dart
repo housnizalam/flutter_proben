@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_proben/functions.dart';
 import 'package:flutter_proben/vector2.dart';
 
 import 'physic_frames.dart';
@@ -35,8 +36,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Player player1 = Player(speed: 1, size: 50, score: 0, position: Vector2(x: 450, y: 450));
-  Player player2 = Player(speed: 1, size: 50, score: 0, position: Vector2());
+  Player player1 = Player(speed: 2, size: 50, score: 0, position: Vector2(x: 450, y: 450));
+  Player player2 = Player(speed: 2, size: 50, score: 0, position: Vector2());
   Ball whiteBall = Ball(opacity: 0, size: 20, position: Vector2(x: 225, y: 255));
   Ball blackBall = Ball(opacity: 0, size: 20, position: Vector2(x: 225, y: 255));
 
