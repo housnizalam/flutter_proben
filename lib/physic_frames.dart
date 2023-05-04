@@ -42,43 +42,4 @@ abstract class PhysicFrames {
   }
 }
 
-class Player {
-  String? Name;
-  double speed;
-  double size;
-  int score;
-  int opacity = 250;
-  Vector2 position;
-  Vector2 moveDirection;
-  Player({
-    required this.speed,
-    required this.score,
-    required this.position,
-    required this.size,
-  }) : moveDirection = Vector2();
-  void move() {
-    final normalized = moveDirection.normalized();
-
-    position.x += normalized.x * speed;
-    position.y += normalized.y * speed;
-  }
-}
-
-class Ball {
-  int opacity;
-  double size;
-
-  Vector2 position;
-  Vector2 direction;
-  Ball({
-    required this.opacity,
-    required this.size,
-    required this.position,
-  }) : direction = Vector2();
-  void move() {
-    final normalized = direction.normalized();
-    position.x += normalized.x;
-    position.y += normalized.y;
-  }
-}
 
