@@ -2,11 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_proben/Klassen.dart';
-import 'package:flutter_proben/appstate.dart';
-import 'package:flutter_proben/emojis.dart';
-import 'package:flutter_proben/vector2.dart';
-import 'physic_frames.dart';
+import 'package:flutter_proben/logik/Klassen.dart';
+import 'package:flutter_proben/logik/appstate.dart';
+import 'package:flutter_proben/logik/physic_frames.dart';
+import 'package:flutter_proben/logik/vector2.dart';
+
 // import 'package:audioplayers/audio_cache.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -22,31 +22,28 @@ class _MyHomePageState extends State<MyHomePage> {
   static final appstate = Appstate();
 
   Player player1 = Player(
-      size: appstate.defaultPlayerSize,
+      size: appstate.playerSize,
       position: Vector2(
-          x: appstate.defaultPlayGroundWidth - appstate.defaultPlayerSize,
-          y: appstate.defaultPlayGroundHeight - appstate.defaultPlayerSize),
-      face: empty);
+          x: appstate.playGroundWidth - appstate.playerSize, y: appstate.playGroundHeight - appstate.playerSize),
+      face: appstate.emojies.empty);
   Player player2 = Player(
-    size: appstate.defaultPlayerSize,
+    size: appstate.playerSize,
     position: Vector2(),
-    face: empty,
+    face: appstate.emojies.empty,
   );
   Ball whiteBall = Ball(
-    opacity: 0,
-    body: empty,
-    size: appstate.defaultBallSize,
+    body: appstate.emojies.empty,
+    size: appstate.foodSize,
     position: Vector2(
-        x: (appstate.defaultPlayGroundWidth - appstate.defaultPlayerSize) / 2,
-        y: (appstate.defaultPlayGroundHeight - appstate.defaultPlayerSize) / 2),
+        x: (appstate.playGroundWidth - appstate.playerSize) / 2,
+        y: (appstate.playGroundHeight - appstate.playerSize) / 2),
   );
   Ball blackBall = Ball(
-    body: empty,
-    opacity: 0,
-    size: appstate.defaultBallSize,
+    body: appstate.emojies.empty,
+    size: appstate.foodSize,
     position: Vector2(
-        x: (appstate.defaultPlayGroundWidth - appstate.defaultPlayerSize) / 2,
-        y: (appstate.defaultPlayGroundHeight - appstate.defaultPlayerSize) / 2),
+        x: (appstate.playGroundWidth - appstate.playerSize) / 2,
+        y: (appstate.playGroundHeight - appstate.playerSize) / 2),
   );
 
   Duration lastFrame = Duration.zero;
@@ -91,8 +88,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
-    appstate.defaultPlayGroundHeight = 0.8 * height;
-    appstate.defaultPlayGroundWidth = 0.8 * width;
+    appstate.playGroundHeight = 0.8 * height;
+    appstate.playGroundWidth = 0.8 * width;
 
     if (appstate.playingMode) {
       WidgetsBinding.instance.addPostFrameCallback((duration) {
@@ -100,8 +97,8 @@ class _MyHomePageState extends State<MyHomePage> {
         Future.delayed(
             delay,
             () => setState(() {
-                  appstate.playRools(player1, player2, whiteBall, blackBall);
-                  appstate.playEnded(player1, player2, whiteBall, blackBall);
+                  appstate.playingRools(player1, player2, whiteBall, blackBall);
+                  appstate.gameEnds(player1, player2, whiteBall, blackBall);
                 }));
         lastFrame = duration;
       });
@@ -204,15 +201,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Padding(
-                        padding: EdgeInsets.fromLTRB(
-                            appstate.defaultPlayGroundWidth / 4, 10, appstate.defaultPlayGroundWidth / 4, 10),
+                        padding:
+                            EdgeInsets.fromLTRB(appstate.playGroundWidth / 4, 10, appstate.playGroundWidth / 4, 10),
                         child: Text(
                           '${player2.name ?? 'Player2'} : ${player2.score}',
                           style: const TextStyle(color: Colors.blue, fontSize: 25),
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: appstate.defaultPlayGroundWidth / 4),
+                        padding: EdgeInsets.symmetric(horizontal: appstate.playGroundWidth / 4),
                         child: Text(
                           '${player1.name ?? 'Player1'} : ${player1.score}',
                           style: const TextStyle(color: Colors.red, fontSize: 25),
@@ -222,8 +219,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   //playground
                   Container(
-                    height: appstate.defaultPlayGroundHeight,
-                    width: appstate.defaultPlayGroundWidth,
+                    height: appstate.playGroundHeight,
+                    width: appstate.playGroundWidth,
                     decoration: BoxDecoration(color: Color.fromARGB(255, 24, 61, 66)),
                     child: Stack(
                       children: [
@@ -232,7 +229,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             appstate.winner + ' Wins',
                             style: TextStyle(
                                 color: appstate.gameOver ? Colors.amber : Color.fromARGB(0, 255, 193, 7),
-                                fontSize: appstate.defaultPlayGroundWidth * 0.1),
+                                fontSize: appstate.playGroundWidth * 0.1),
                           ),
                         ),
                         //player1

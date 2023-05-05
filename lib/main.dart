@@ -2,11 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_proben/appstate.dart';
 import 'package:flutter_proben/home.dart';
-import 'package:flutter_proben/vector2.dart';
+import 'package:flutter_proben/logik/physic_frames.dart';
 
-import 'physic_frames.dart';
 
 void main() {
   PhysicFrames.init();

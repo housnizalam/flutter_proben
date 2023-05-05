@@ -3,18 +3,15 @@
 // import 'package:audioplayers/audioplayers.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
-import 'package:flutter_proben/emojis.dart';
+import 'package:flutter_proben/logik/vector2.dart';
 
-import 'package:flutter_proben/vector2.dart';
 
 class Player {
-  Emoji face = empty;
-  bool freazed = false;
+  late Emoji face;
   int score = 0;
   String? name;
   double speed = 0;
   double size;
-  int opacity = 0;
   Vector2 position;
   Vector2 moveDirection;
   Player({
@@ -31,12 +28,10 @@ class Player {
 }
 
 class Ball {
-  Emoji body = empty;
-  int opacity;
+  late Emoji body;
   double size;
   Vector2 position;
   Ball({
-    required this.opacity,
     required this.size,
     required this.body,
     required this.position,
@@ -62,6 +57,12 @@ class SounEffect {
     final audioPlayer = AudioPlayer();
     // audioPlayer.audioCache = audioCache;
     return audioPlayer.play(DeviceFileSource('sounds/win.mp3'));
+  }
+
+  gameStart() {
+    final audioPlayer = AudioPlayer();
+    // audioPlayer.audioCache = audioCache;
+    return audioPlayer.play(DeviceFileSource('sounds/gamestart.mp3'));
   }
 }
 
