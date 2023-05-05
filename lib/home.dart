@@ -6,8 +6,8 @@ import 'package:flutter_proben/Klassen.dart';
 import 'package:flutter_proben/appstate.dart';
 import 'package:flutter_proben/emojis.dart';
 import 'package:flutter_proben/vector2.dart';
-import 'package:flutter_emoji/flutter_emoji.dart';
 import 'physic_frames.dart';
+// import 'package:audioplayers/audio_cache.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -26,20 +26,22 @@ class _MyHomePageState extends State<MyHomePage> {
       position: Vector2(
           x: appstate.defaultPlayGroundWidth - appstate.defaultPlayerSize,
           y: appstate.defaultPlayGroundHeight - appstate.defaultPlayerSize),
-      face: smileFace);
+      face: empty);
   Player player2 = Player(
     size: appstate.defaultPlayerSize,
     position: Vector2(),
-    face: lovelyFace,
+    face: empty,
   );
   Ball whiteBall = Ball(
     opacity: 0,
+    body: empty,
     size: appstate.defaultBallSize,
     position: Vector2(
         x: (appstate.defaultPlayGroundWidth - appstate.defaultPlayerSize) / 2,
         y: (appstate.defaultPlayGroundHeight - appstate.defaultPlayerSize) / 2),
   );
   Ball blackBall = Ball(
+    body: empty,
     opacity: 0,
     size: appstate.defaultBallSize,
     position: Vector2(
@@ -99,6 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
             delay,
             () => setState(() {
                   appstate.playRools(player1, player2, whiteBall, blackBall);
+                  appstate.playEnded(player1, player2, whiteBall, blackBall);
                 }));
         lastFrame = duration;
       });
@@ -124,6 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 child: Icon(
                   Icons.play_arrow,
+                  size: player1.size * 0.6,
                   color: appstate.playingMode ? Colors.blue : Colors.grey,
                 ),
               ),
@@ -138,7 +142,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     });
                   },
                   child: Icon(
-                    Icons.stop,
+                    Icons.pause,
+                    size: player1.size * 0.6,
                     color: appstate.stoped ? Colors.red : Colors.grey,
                   )),
             ),
@@ -150,7 +155,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       appstate.restart(player1, player2, whiteBall, blackBall);
                     });
                   },
-                  child: Icon(Icons.refresh)),
+                  child: Icon(
+                    Icons.refresh,
+                    size: player1.size * 0.6,
+                  )),
             ),
           ],
         ),
@@ -212,90 +220,63 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ],
                   ),
-                  if (player1.score > 9)
-                    Container(
-                      color: Colors.green,
-                      height: appstate.defaultPlayGroundHeight,
-                      width: appstate.defaultPlayGroundWidth,
-                      child: Center(
-                        child: Text(
-                          '${player1.name ?? 'Player1'} Wins',
-                          style: const TextStyle(color: Colors.red, fontSize: 40, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    )
-                  else if (player2.score > 9)
-                    Container(
-                      color: Colors.green,
-                      height: appstate.defaultPlayGroundHeight,
-                      width: appstate.defaultPlayGroundWidth,
-                      child: Center(
-                        child: Text(
-                          '${player2.name ?? 'Player2'} Wins',
-                          style: const TextStyle(color: Colors.blue, fontSize: 40, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    )
-                  else
-                    Container(
-                      height: appstate.defaultPlayGroundHeight,
-                      width: appstate.defaultPlayGroundWidth,
-                      color: Colors.green,
-                      child: Stack(
-                        children: [
-                          //player1
-                          Positioned(
-                            left: player1.position.x - player1.size * 0.28,
-                            top: player1.position.y - player1.size * 0.28,
-                            child: Text(
-                              player1.face.code,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: player1.size),
-                            ),
+                  //playground
+                  Container(
+                    height: appstate.defaultPlayGroundHeight,
+                    width: appstate.defaultPlayGroundWidth,
+                    decoration: BoxDecoration(color: Color.fromARGB(255, 24, 61, 66)),
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Text(
+                            appstate.winner + ' Wins',
+                            style: TextStyle(
+                                color: appstate.gameOver ? Colors.amber : Color.fromARGB(0, 255, 193, 7),
+                                fontSize: appstate.defaultPlayGroundWidth * 0.1),
                           ),
-                          //player2
-                          Positioned(
-                              left: player2.position.x,
-                              top: player2.position.y,
-                              child: Text(
-                                player2.face.code,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: player2.size),
-                              )),
-                              //White Ball
-                          Positioned(
+                        ),
+                        //player1
+                        Positioned(
+                          left: player1.position.x - player1.size * 0.28,
+                          top: player1.position.y - player1.size * 0.28,
+                          child: Text(
+                            player1.face.code,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: player1.size),
+                          ),
+                        ),
+                        //player2
+                        Positioned(
+                            left: player2.position.x,
+                            top: player2.position.y,
+                            child: Text(
+                              player2.face.code,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: player2.size),
+                            )),
+                        //White Ball
+                        Positioned(
                             left: whiteBall.position.x,
                             top: whiteBall.position.y,
-                            child: Center(
-                              child: Container(
-                                height: whiteBall.size,
-                                width: whiteBall.size,
-                                decoration: BoxDecoration(
-                                  color: Color.fromARGB(whiteBall.opacity, 255, 255, 255),
-                                  border: Border.all(width: 2, color: Color.fromARGB(whiteBall.opacity, 0, 0, 0)),
-                                  borderRadius: BorderRadius.circular(whiteBall.size),
-                                ),
+                            child: Text(
+                              whiteBall.body.code,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: whiteBall.size,
                               ),
-                            ),
-                          ),
-                          //Black Ball
-                          Positioned(
+                            )),
+                        //Black Ball
+                        Positioned(
                             left: blackBall.position.x,
                             top: blackBall.position.y,
-                            child: Center(
-                              child: Container(
-                                height: blackBall.size,
-                                width: blackBall.size,
-                                decoration: BoxDecoration(
-                                  color: Color.fromARGB(blackBall.opacity, 0, 0, 0),
-                                  borderRadius: BorderRadius.circular(blackBall.size),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                            child: Text(
+                              blackBall.body.code,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: whiteBall.size),
+                            )),
+                      ],
                     ),
+                  ),
                 ],
               ),
       ),

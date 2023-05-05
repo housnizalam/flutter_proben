@@ -1,12 +1,16 @@
 import 'dart:math';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_proben/Klassen.dart';
 import 'package:flutter_proben/emojis.dart';
 import 'package:flutter_proben/physic_frames.dart';
+import 'package:flutter_proben/sounds.dart';
 import 'package:flutter_proben/vector2.dart';
 
 class Appstate {
+  bool gameOver = false;
+  String winner = '';
   double defaultPlayGroundHeight = 500;
   double defaultPlayGroundWidth = 500;
   double defaultPlayerSize = 50;
@@ -16,6 +20,7 @@ class Appstate {
   bool stoped = false;
   bool player1EatTheBall = false;
   bool player2EatTheBall = false;
+  final sounEffect = SounEffect();
   bool eatDistansdefinition(Player player1, Player player2, Ball whiteBall) {
     bool kommingFromLeft = false;
     if (whiteBall.position.x - player1.position.x < player1.size / 2) {
@@ -129,7 +134,9 @@ class Appstate {
     } else if (!player1EatTheBall && !player2EatTheBall) {
       player1.face = smileFace;
     }
+
     if (eatDistansdefinition(player1, player2, whiteBall)) {
+      sounEffect.eatHamburger();
       player2.speed += 0.2;
       player1.score++;
       whiteBall.position.x = Random().nextInt((defaultPlayGroundWidth - defaultPlayerSize + 1).toInt()).toDouble();
@@ -141,12 +148,15 @@ class Appstate {
       player2.face = lovelyFace;
     }
     if (eatDistansdefinition2(player2, player1, whiteBall)) {
+      sounEffect.eatHamburger();
+
       player1.speed += 0.2;
       player2.score++;
       whiteBall.position.x = Random().nextInt((defaultPlayGroundWidth - defaultPlayerSize + 1).toInt()).toDouble();
       whiteBall.position.y = Random().nextInt((defaultPlayGroundHeight - defaultPlayerSize + 1).toInt()).toDouble();
     }
     if (eatDistansdefinition(player1, player2, blackBall)) {
+      sounEffect.laugh();
       blackBall.position.x = Random().nextInt((defaultPlayGroundWidth - defaultPlayerSize + 1).toInt()).toDouble();
       blackBall.position.y = Random().nextInt((defaultPlayGroundHeight - defaultPlayerSize + 1).toInt()).toDouble();
       player2.speed = 0;
@@ -167,6 +177,8 @@ class Appstate {
       });
     }
     if (eatDistansdefinition2(player2, player1, blackBall)) {
+      sounEffect.laugh();
+
       player1.speed = 0;
       blackBall.position.x = Random().nextInt((defaultPlayGroundWidth - defaultPlayerSize + 1).toInt()).toDouble();
       blackBall.position.y = Random().nextInt((defaultPlayGroundHeight - defaultPlayerSize + 1).toInt()).toDouble();
@@ -189,14 +201,15 @@ class Appstate {
   }
 
   playBottun(Player player1, Player player2, Ball whiteBall, Ball blackBall) {
-    if (player1.score > 9 || player2.score > 9) {
-      restart(player1, player2, whiteBall, blackBall);
-    } else if (stoped) {
+    if (stoped) {
       stoped = false;
       playingMode = true;
     } else if (!playingMode) {
       playerWithMonitorConvenience(player1, player2, whiteBall, blackBall);
+      whiteBall.body = hamburger;
+      blackBall.body = banana;
       playingMode = true;
+      gameOver = false;
       player1.speed = 3;
       player2.speed = 3;
       if (defaultPlayGroundHeight > 750 && defaultPlayGroundWidth > 750) {
@@ -213,6 +226,41 @@ class Appstate {
       whiteBall.position.y = Random().nextInt((defaultPlayGroundHeight - defaultPlayerSize + 1).toInt()).toDouble();
       blackBall.position.x = Random().nextInt((defaultPlayGroundWidth - defaultPlayerSize + 1).toInt()).toDouble();
       blackBall.position.y = Random().nextInt((defaultPlayGroundHeight - defaultPlayerSize + 1).toInt()).toDouble();
+    }
+  }
+
+  playEnded(Player player1, Player player2, Ball whiteBAll, Ball blackBall) {
+    if (player1.score > 9) {
+      sounEffect.win();
+      winner = player1.name ?? '';
+      player1.face = empty;
+      player2.face = empty;
+      whiteBAll.body = empty;
+      blackBall.body = empty;
+      player1.moveDirection.y = 0;
+      player1.moveDirection.x = 0;
+      player2.moveDirection.y = 0;
+      player2.moveDirection.x = 0;
+      gameOver = true;
+      playingMode = false;
+      player1.score = 0;
+      player2.score = 0;
+    } else if (player2.score > 9) {
+      sounEffect.win();
+      winner = player2.name ?? '';
+      player1.face = empty;
+      player2.face = empty;
+      whiteBAll.body = empty;
+      blackBall.body = empty;
+      player1.moveDirection.y = 0;
+      player1.moveDirection.x = 0;
+      player2.moveDirection.y = 0;
+      player2.moveDirection.x = 0;
+      gameOver = true;
+
+      playingMode = false;
+      player1.score = 0;
+      player2.score = 0;
     }
   }
 
@@ -234,12 +282,14 @@ class Appstate {
     } else {
       player1.size = size / 13;
       player2.size = size / 13;
-      whiteBall.size = size / 34;
-      blackBall.size = size / 34;
+      whiteBall.size = size / 27;
+      blackBall.size = size / 27;
     }
   }
 
   restart(Player player1, Player player2, Ball whiteBall, Ball blackBall) {
+    whiteBall.body = hamburger;
+    blackBall.body = banana;
     player1.score = 0;
     player2.score = 0;
     player1.speed = 3;
@@ -262,7 +312,7 @@ class Appstate {
     if (RawKeyboard.instance.keysPressed.contains(
       LogicalKeyboardKey.arrowUp,
     )) {
-      if (player1.position.y < -defaultPlayerSize * 0.8) {
+      if (player1.position.y < -defaultPlayerSize * 0.7) {
         player1.position.y = defaultPlayGroundHeight - defaultPlayerSize * 0.2;
       } else {
         dirPlayer1.y--;
@@ -274,7 +324,7 @@ class Appstate {
     if (RawKeyboard.instance.keysPressed.contains(
       LogicalKeyboardKey.arrowDown,
     )) {
-      if (player1.position.y > defaultPlayGroundHeight - defaultPlayerSize * 0.2) {
+      if (player1.position.y > defaultPlayGroundHeight - defaultPlayerSize * 0.3) {
         player1.position.y = -defaultPlayerSize * 0.8;
       } else {
         dirPlayer1.y++;
@@ -286,7 +336,7 @@ class Appstate {
     if (RawKeyboard.instance.keysPressed.contains(
       LogicalKeyboardKey.arrowRight,
     )) {
-      if (player1.position.x > defaultPlayGroundWidth - defaultPlayerSize * 0.2) {
+      if (player1.position.x > defaultPlayGroundWidth - defaultPlayerSize * 0.3) {
         player1.position.x = -defaultPlayerSize * 0.8;
       } else {
         dirPlayer1.x++;
@@ -298,7 +348,7 @@ class Appstate {
     if (RawKeyboard.instance.keysPressed.contains(
       LogicalKeyboardKey.arrowLeft,
     )) {
-      if (player1.position.x < -defaultPlayerSize * 0.8) {
+      if (player1.position.x < -defaultPlayerSize * 0.6) {
         player1.position.x = defaultPlayGroundWidth - defaultPlayerSize * 0.2;
       } else {
         dirPlayer1.x--;
@@ -310,8 +360,8 @@ class Appstate {
     if (RawKeyboard.instance.keysPressed.contains(
       LogicalKeyboardKey.keyW,
     )) {
-      if (player2.position.y < -defaultPlayerSize * 0.8) {
-        player2.position.y = defaultPlayGroundHeight - defaultPlayerSize * 0.2;
+      if (player2.position.y < -defaultPlayerSize * 0.7) {
+        player2.position.y = defaultPlayGroundHeight - defaultPlayerSize * 0.4;
       } else {
         dirPlayer2.y--;
       }
@@ -322,8 +372,8 @@ class Appstate {
     if (RawKeyboard.instance.keysPressed.contains(
       LogicalKeyboardKey.keyS,
     )) {
-      if (player2.position.y > defaultPlayGroundHeight - defaultPlayerSize * 0.2) {
-        player2.position.y = -defaultPlayerSize * 0.8;
+      if (player2.position.y > defaultPlayGroundHeight - defaultPlayerSize * 0.6) {
+        player2.position.y = -defaultPlayerSize;
       } else {
         dirPlayer2.y++;
       }

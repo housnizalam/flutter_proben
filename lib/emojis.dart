@@ -10,4 +10,7 @@ final loveEat = Emoji('loveEat', '😍');
 final sick = Emoji('sick', '🤢');
 final freazed = Emoji('freazed', '🥶');
 final crazy = Emoji('happy', '🤪');
-var heart = Emoji('heart', '❤️');
+final hamburger = Emoji('happy', '🍔');
+final banana = Emoji('happy', '🍌');
+
+final empty = Emoji('heart', '');
